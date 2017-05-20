@@ -17,10 +17,13 @@ missing_values_drop_column = 3
 missing_values_not_decided = 4
 
 # Importing the dataset
-dataset_complete = pd.read_csv('train.csv')
+#dataset_complete = pd.read_csv('train.csv')
 preprocessing_override = pd.read_csv('preprocessing_override.csv')
-dataset_X = dataset_complete
-dataset_y = dataset_complete['Survived']
+
+dataset_X = pd.read_csv('train.csv')
+dataset_y = dataset_X['Survived']
+
+dataset_X_verify = pd.read_csv('test.csv')
 
 del dataset_X['Survived']
 del preprocessing_override['Survived']
@@ -125,7 +128,9 @@ normalize_strategy = preprocess_list[3]
 
 y = dataset_y.iloc[:].values
 X = dataset_X.iloc[:, :].values
-X_test = pd.read_csv('test.csv').iloc[:,:].values
+X_verify = dataset_X_verify.iloc[:, :].values
+
+
 
 # Taking care of missing data by dropping the rows
 
@@ -138,7 +143,7 @@ for i in missing_columns_drop_rows:
     y = np.delete(y, indices_of_empty_rows , axis=0)
 
     indices_of_empty_rows_test = np.where((pd.isnull(X_test[:,i]) == True))[0]
-    X_test = np.delete(X_test, indices_of_empty_rows_test , axis=0)
+    X_verify = np.delete(X_verify, indices_of_empty_rows_test , axis=0)
 
     
     
@@ -155,7 +160,7 @@ for i in missing_columns_tobe_filled_with_mean:
     X[:, i:i+1] = imputer.transform(X[:, i:i+1])
     
     imputer = imputer.fit(X_test[:, i:i+1])
-    X_test[:, i:i+1] = imputer.transform(X_test[:, i:i+1])
+    X_verify[:, i:i+1] = imputer.transform(X_verify[:, i:i+1])
 
 
 # Taking care of missing data by dropping columns
@@ -165,7 +170,7 @@ missing_columns_drop_column = list(np.where(np.array(missing_values_strategy) ==
 # Delete columns from X matching the index numbers in missing_columns_drop_column
 
 X = np.delete(X, missing_columns_drop_column , axis=1)
-X_test = np.delete(X_test, missing_columns_drop_column , axis=1)
+X_verify = np.delete(X_verify, missing_columns_drop_column , axis=1)
 
 
 # Delete items from missing_values_strategy corresponding to the columns dropped in X
@@ -194,7 +199,7 @@ drop_column = list(np.where(np.array(drop_column_strategy) == True))[0]
 # Delete columns from X matching the index numbers in missing_columns_drop_column
 
 X = np.delete(X, drop_column , axis=1)
-X_test = np.delete(X_test, drop_column , axis=1)
+X_verify = np.delete(X_verify, drop_column , axis=1)
 
 # Delete items from missing_values_strategy corresponding to the columns dropped in X
 
@@ -226,26 +231,26 @@ if (category_encoding_columns.any()):
     for i in (category_encoding_columns):
         X[:, i] = labelencoder_X.fit_transform(X[:, i])
         
-        X_test_drop_rows = np.where((pd.isnull(X_test[:,i]) == True))[0]
-        if (X_test_drop_rows.any()):
-            X_test = np.delete(X_test, X_test_drop_rows , axis=0)
-        X_test[:,i] = labelencoder_X.transform(X_test[:, i])
+        X_verify_drop_rows = np.where((pd.isnull(X_verify[:,i]) == True))[0]
+        if (X_verify_drop_rows.any()):
+            X_verify = np.delete(X_verify, X_verify_drop_rows , axis=0)
+        X_verify[:,i] = labelencoder_X.transform(X_verify[:, i])
 
     X_extract = X[:,category_encoding_columns]
-    X_test_extract = X_test[:,category_encoding_columns]
+    X_verify_extract = X_verify[:,category_encoding_columns]
     onehotencoder = OneHotEncoder(categorical_features = 'all')    
     X_extract_encoded = onehotencoder.fit_transform(X_extract).toarray()
-    X_test_extract_encoded = onehotencoder.fit_transform(X_test_extract).toarray()
+    X_verify_extract_encoded = onehotencoder.fit_transform(X_verify_extract).toarray()
 
     X = np.delete(X, category_encoding_columns , axis=1)
-    X_test = np.delete(X_test, category_encoding_columns , axis=1)
+    X_verify = np.delete(X_verify, category_encoding_columns , axis=1)
     category_encoding_ind = list(np.delete(np.array(category_encoding_ind), category_encoding_columns , axis=0))
 # Delete items from normalize_strategy corresponding to the columns dropped in X
     normalize_strategy = list(np.delete(np.array(normalize_strategy), category_encoding_columns , axis=0))
 
     
     X = np.c_[X, X_extract_encoded]
-    X_test = np.c_[X_test, X_test_extract_encoded]
+    X_verify = np.c_[X_verify, X_verify_extract_encoded]
 
 # For numeric columns, scale the values appropriately
 
@@ -255,11 +260,11 @@ normalize_strategy_columns = list(np.where(np.array(normalize_strategy) == True)
 for i in normalize_strategy_columns:
 
     X[:, [i]] = sc_X.fit_transform(X[:, i].reshape(-1, 1))
-    X_test_drop_rows = np.where((pd.isnull(X_test[:,i]) == True))[0]
-    if (X_test_drop_rows.any()):
-        X_test = np.delete(X_test, X_test_drop_rows , axis=0)
+    X_verify_drop_rows = np.where((pd.isnull(X_verify[:,i]) == True))[0]
+    if (X_verify_drop_rows.any()):
+        X_verify = np.delete(X_verify, X_verify_drop_rows , axis=0)
 
-    X_test[:,[i]] = sc_X.transform(X_test[:,i].reshape(-1,1))
+    X_verify[:,[i]] = sc_X.transform(X_verify[:,i].reshape(-1,1))
 
 #sc_y = StandardScaler()
 #y_train = sc_y.fit_transform(y_train)
