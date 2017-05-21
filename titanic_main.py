@@ -19,4 +19,11 @@ import preprocess_data as prd
 
 preprocessed_data = prd.preprocess_data(dataset_X, dataset_y, preprocessing_override, dataset_X_verify)
 
-print (preprocessed_data["X"][0:3,:])
+X = preprocessed_data["X"]
+y = preprocessed_data["y"]
+
+# import get_best_model as bfm
+import get_best_model_2 as bfm
+
+best_fit_model = bfm.get_best_model(X,y)
+print (best_fit_model)
