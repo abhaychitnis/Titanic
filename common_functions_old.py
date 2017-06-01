@@ -4,7 +4,7 @@ import pandas as pd
 
 def preprocess_ind (dataset, override):
 
-    unique_identification_cutoff = 0.1
+    unique_identification_cutoff = 0.01
     drop_column_cutoff = 0.75
 
     override_ind = 0
@@ -12,7 +12,6 @@ def preprocess_ind (dataset, override):
     dropcolumn_override_ind = 2
 
     num_rows, num_columns = dataset.shape
-    
     null_list = dataset.isnull().sum()
     encoding_override = list((override == encoding_override_ind).values)[0]
     drop_column_override = list((override == dropcolumn_override_ind).values)[0]
@@ -41,7 +40,6 @@ def preprocess_ind (dataset, override):
 # indicates potential of uniqueness. A value of 1 indicates that every value in the coulmn is different than the rest
         disparate_data_index = ((len(column_with_notnull_values.unique())) /(num_rows-null_list[i]))
 
-
 # Inspect the data type
         number_datatype = False
         if dataset[dataset.columns[i]].dtype in ('int64', 'float64'):
@@ -66,8 +64,8 @@ def preprocess_ind (dataset, override):
 #Set the missing value strategy to not applicable as there are no missing values
             missing_value_strategy.append(0)
 
+
         if disparate_data_index < drop_column_cutoff   \
-        or number_datatype \
         or drop_column_override[i]  \
         or missing_value_strategy[i] == 3:
             pass
@@ -94,6 +92,11 @@ def preprocess_ind (dataset, override):
             pass
         else:
             normalize_strategy_columns.append(i)
+
+
+#    category_encoding_columns = list(np.where(np.array(category_encoding_strategy) == True))[0]
+#    normalize_strategy_columns = list(np.where(np.array(normalize_strategy) == True))[0]
+#    drop_strategy_columns = list(np.where(np.array(drop_column_strategy) == True))[0]
 
 
 
@@ -180,7 +183,6 @@ def manage_category_encoding(X, category_encoding_columns, drop_strategy_columns
 
 # For unique string column that can be cosidered as classification, convert into classification encoding using onecode
 
-    X_extract_encoded = None
     if not (not category_encoding_columns):
         from sklearn.preprocessing import LabelEncoder, OneHotEncoder
         labelencoder_X = LabelEncoder()
@@ -206,9 +208,6 @@ def manage_category_encoding(X, category_encoding_columns, drop_strategy_columns
     X = np.delete(X, category_encoding_columns+drop_strategy_columns , axis=1)
 
 # Append the encoded columns
-    if X_extract_encoded == None:
-        pass
-    else:
-        X = np.c_[X_extract_encoded, X]
+    X = np.c_[X, X_extract_encoded]
 
     return(X)

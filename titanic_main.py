@@ -23,7 +23,7 @@ X = preprocessed_data["X"]
 y = preprocessed_data["y"]
 
 # import get_best_model as bfm
-import get_best_model_2 as bfm
+import get_best_classification_model as bfm
 
 best_fit_model = bfm.get_best_model(X,y)
 print (best_fit_model)

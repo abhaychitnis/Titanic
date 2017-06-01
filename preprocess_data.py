@@ -35,4 +35,16 @@ def preprocess_data(dataset_X, dataset_y, override, dataset_X_verify):
     
     X = cm.manage_category_encoding(X, category_encoding_columns, drop_strategy_columns)
 
+    return_y_object = cm.manage_target_values(y)
+
+    y = return_y_object['y']
+    standardScaler_y = return_y_object['standardScaler_y']
+    labelEncoder_y = return_y_object['labelEncoder_y']
+
+    if labelEncoder_y == None:
+        print ("No Label Encoding of Y")
+    if standardScaler_y == None:
+        print ("No Standard Scaling of Y")
+
+  
     return ({"X":X, "y":y})
