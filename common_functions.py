@@ -10,12 +10,14 @@ def preprocess_ind (dataset, override):
     override_ind = 0
     encoding_override_ind = 1
     dropcolumn_override_ind = 2
+    normalize_override_ind = 3
 
     num_rows, num_columns = dataset.shape
     
     null_list = dataset.isnull().sum()
     encoding_override = list((override == encoding_override_ind).values)[0]
     drop_column_override = list((override == dropcolumn_override_ind).values)[0]
+    normalize_column_override = list((override == normalize_override_ind).values)[0]
 
     return_list = []
     category_encoding_columns = []
@@ -34,6 +36,7 @@ def preprocess_ind (dataset, override):
         if null_list[i] != 0:
             presence_of_missing_values = True
 
+#   Initialize indicators
         drop_ind = False
         encode_ind = False
 
@@ -90,6 +93,7 @@ def preprocess_ind (dataset, override):
         if encode_ind or  \
            missing_value_strategy [i] == 3   or  \
            drop_ind  or \
+           normalize_column_override[i] or \
            not number_datatype:
             pass
         else:
@@ -122,7 +126,8 @@ def manage_missing_values(X,y, missing_values_strategy):
         indices_of_empty_rows = np.where((pd.isnull(X[:,i]) == True))[0]
 
         X = np.delete(X, indices_of_empty_rows , axis=0)
-        y = np.delete(y, indices_of_empty_rows , axis=0)
+        if y != None:
+            y = np.delete(y, indices_of_empty_rows , axis=0)
 
 # Taking care of missing data by filling with mean values
 

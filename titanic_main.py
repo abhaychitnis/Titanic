@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import pickle
 
 
 preprocessing_override = pd.read_csv('preprocessing_override.csv')
@@ -23,7 +24,10 @@ X = preprocessed_data["X"]
 y = preprocessed_data["y"]
 
 # import get_best_model as bfm
-import get_best_classification_model as bfm
+#import get_best_classification_model as bfm
+import get_best_model as bfm
 
-best_fit_model = bfm.get_best_model(X,y)
-print (best_fit_model)
+best_fit_model = pickle.loads(bfm.get_best_model(X,y))
+
+print (best_fit_model.predict(X[0:25]))
+print (y[0:25])
